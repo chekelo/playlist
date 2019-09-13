@@ -7,16 +7,24 @@ let fakeServerData = {
     playlists: [
       {
         name: 'Loquera',
-        songs: ['electro 1', 'titanic', 'party animal']
+        songs: [
+          { name: 'electro 1' },
+          { name: 'titanic' },
+          { name: 'party animal' }
+        ]
       },
       {
         name: 'rock y otras',
-        songs: ['Patiente', 'The reason', 'Number of the best']
+        songs: [
+          { name: 'Patiente' },
+          { name: 'The reason' },
+          { name: 'Number of the best' }
+        ]
       }
     ]
   }
-  }
-  
+}
+
 
 class Title extends Component {
   constructor() {
@@ -33,22 +41,22 @@ class Title extends Component {
 }
 
 class Summary extends Component {
- 
+
   render() {
-    
-    return <div style={{ display: 'inline-block', margin: '100px' }}>
-      <h2>{this.props.playlists && this.props.playlists.length} Playlist</h2>      
+
+    return <div style={{ display: 'inline-block', marginRight: '100px' }}>
+      <h2>{this.props.playlists && this.props.playlists.length} Playlist</h2>
     </div>
   }
 }
 class TotalSongs extends Component {
- 
+
   render() {
-    let allSongs= this.props.playlists.reduce((songs,eachPlaylist)=>{
+    let allSongs = this.props.playlists.reduce((songs, eachPlaylist) => {
       return songs.concat(eachPlaylist.songs);
-    },[]);
-    return <div style={{ display: 'inline-block', margin: '2px' }}>
-      <h2>{allSongs.length} Canciones</h2>      
+    }, []);
+    return <div style={{ display: 'inline-block' }}>
+      <h2>{allSongs.length} Canciones</h2>
     </div>
   }
 }
@@ -62,19 +70,15 @@ class Filter extends Component {
 }
 
 class Playlist extends Component {
-  constructor() {
-    super();
-    this.state = { serverData: fakeServerData }
-  }
   render() {
-    return (     
-      <div style={{ width: '25%' }}>
+    return (
+      <div style={{ display: 'inline-block', width: '25%' }}>
         <img />
-        <h3>Name of Playlist</h3>
+        <h3>{this.props.playlist.name}</h3>
         <ul>
-          <li>Song 1</li>
-          <li>Song 2</li>
-          <li>Song 3</li>
+          {this.props.playlist.songs.map(song =>
+            <li>{song.name}</li>
+          )}
         </ul>
       </div>
     );
@@ -86,17 +90,23 @@ class App extends Component {
     super();
     this.state = { serverData: fakeServerData }
   }
-  componentDidMount(){
-    this.state=({serverData:fakeServerData});
+  componentDidMount() {
+    this.state = ({ serverData: fakeServerData });
   }
   render() {
     return (
       <div className="App">
-        <Title />
-        <Summary playlists={this.state.serverData.user && this.state.serverData.user.playlists} />
-        <TotalSongs playlists={this.state.serverData.user && this.state.serverData.user.playlists}  />
-        <Filter />
-        <Playlist />
+        {this.state.serverData.user ?
+          <div>
+            <Title />
+            <Summary playlists={this.state.serverData.user && this.state.serverData.user.playlists} />
+            <TotalSongs playlists={this.state.serverData.user && this.state.serverData.user.playlists} />
+            <Filter />
+            {this.state.serverData.user.playlists.map(playlist =>
+              <Playlist playlist={playlist} />
+            )}
+          </div> : ''
+        }
       </div>
     );
   }
