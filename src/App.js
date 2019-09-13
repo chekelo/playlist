@@ -27,15 +27,9 @@ let fakeServerData = {
 
 
 class Title extends Component {
-  constructor() {
-    super();
-    this.state = { serverData: fakeServerData }
-  }
-
   render() {
     return (
-      <h1>Lista de reproducción de{this.state.serverData.user
-        && this.state.serverData.user.name}</h1>
+      <h1>Lista de reproducción de {this.props.name}</h1>
     );
   }
 }
@@ -64,7 +58,7 @@ class TotalSongs extends Component {
 class Filter extends Component {
   render() {
     return <div>
-      <input />
+      <input type='text' onKeyUp={even=>this.props.onTextChange(even.target.value)} />
     </div>
   }
 }
@@ -88,21 +82,31 @@ class Playlist extends Component {
 class App extends Component {
   constructor() {
     super();
-    this.state = { serverData: fakeServerData }
+    this.state = {
+      serverData: {},
+      filterString: ''
+    }
   }
   componentDidMount() {
-    this.state = ({ serverData: fakeServerData });
+    setTimeout(() => {      
+    this.setState({ serverData: fakeServerData });
+    }, 1000);
+    setTimeout(() => {      
+      this.setState({ filterString: '' });
+      }, 2000);
   }
   render() {
     return (
       <div className="App">
         {this.state.serverData.user ?
           <div>
-            <Title />
+            <Title name={this.state.serverData.user.name} />
             <Summary playlists={this.state.serverData.user && this.state.serverData.user.playlists} />
             <TotalSongs playlists={this.state.serverData.user && this.state.serverData.user.playlists} />
-            <Filter />
-            {this.state.serverData.user.playlists.map(playlist =>
+            <Filter onTextChange={text => this.setState({filterString: text})} />
+            {this.state.serverData.user.playlists.filter(playlist =>
+              playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase())
+            ).map(playlist =>
               <Playlist playlist={playlist} />
             )}
           </div> : ''
