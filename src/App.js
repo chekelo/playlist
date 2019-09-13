@@ -91,22 +91,22 @@ class App extends Component {
     setTimeout(() => {      
     this.setState({ serverData: fakeServerData });
     }, 1000);
-    setTimeout(() => {      
-      this.setState({ filterString: '' });
-      }, 2000);
   }
   render() {
+
+    let playlistToRender=this.state.serverData.user ?this.state.serverData.user.playlists.filter(playlist =>
+      playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase())
+    ): []
+
     return (
       <div className="App">
         {this.state.serverData.user ?
           <div>
             <Title name={this.state.serverData.user.name} />
-            <Summary playlists={this.state.serverData.user && this.state.serverData.user.playlists} />
-            <TotalSongs playlists={this.state.serverData.user && this.state.serverData.user.playlists} />
+            <Summary playlists={playlistToRender} />
+            <TotalSongs playlists={playlistToRender} />
             <Filter onTextChange={text => this.setState({filterString: text})} />
-            {this.state.serverData.user.playlists.filter(playlist =>
-              playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase())
-            ).map(playlist =>
+            {playlistToRender.map(playlist =>
               <Playlist playlist={playlist} />
             )}
           </div> : ''
