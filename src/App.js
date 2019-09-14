@@ -2,14 +2,30 @@ import React, { Component } from 'react';
 import './App.css';
 import queryString from 'query-string';
 
+/**
+ * TODO 
+ * 
+ * -Mostrar listado completo de canciones por playlist
+ * -Agregar canciones a una playlist específica
+ */
+
+
+ /**
+  * Componente para mostrar datos de usuario, actualmente muestra nombre e imagen
+  */
+
 class Title extends Component {
   render() {
-    return (
-      <h1>Lista de reproducción de {this.props.name}</h1>
-    );
+    console.log(this.props.user)
+    return <div>
+      <img src={this.props.user.imageUrl} style={{borderRadius:'50%'}}/>
+      <h1>Lista de reproducción de {this.props.user.name}</h1>
+    </div>
   }
 }
-
+/**
+  * Componente para mostrar la cantidad de playlist que posee el usuario
+  */
 class Summary extends Component {
 
   render() {
@@ -19,11 +35,14 @@ class Summary extends Component {
     </div>
   }
 }
+
+/**
+  * Componente para mostrar la cantidad Canciones de las playlists
+  */
 class TotalSongs extends Component {
 
   render() {
     let allSongs = this.props.playlists.reduce((songs, eachPlaylist) => {
-      console.log(songs)
       return songs.concat(eachPlaylist.songs);
     }, []);
     return <div style={{ display: 'inline-block' }}>
@@ -32,6 +51,11 @@ class TotalSongs extends Component {
   }
 }
 
+/**
+  * Componente para buscar por nombre de playlist 
+  * 
+  * TODO: extender funcionalidad para que permita el filtrado por nombre de canciones
+  */
 class Filter extends Component {
   render() {
     return <div>
@@ -40,30 +64,46 @@ class Filter extends Component {
   }
 }
 
+/**
+  * Componente para mostrar la información de la playlist, incluye las canciones
+  * Se realiza un ajuste para solo mostrar las primeras 5 canciones
+  */
 class Playlist extends Component {
   render() {
     return (
-      <div style={{ display: 'inline-block', width: '25%' }}>
-        <img src={this.props.playlist.imageUrl} style={{ width: '100px' }} />
+      <div style={{ display: 'inline-block', width: '25%', marginBottom: '10px'}}>
+        <img src={this.props.playlist.imageUrl} style={{ width: '100px', borderRadius:'50%' }} />
         <h3>{this.props.playlist.name} (Top 5)</h3>
-        <ul>
-          {this.props.playlist.songs.slice(0,5).map(song =>
+        <ul style={{listStyle:'none'}}>      
+          {this.props.playlist.songs.slice(0, 5).map(song =>
             <li>{song.name}</li>
           )}
         </ul>
+        <button 
+        style={{backgroundColor:'#337ab7',color: '#fff',borderColor: '#2e6da4'}} 
+        onClick={() => window.location = '/listSongs'}>
+        Ver canciones
+        </button>
       </div>
     );
   }
 }
 
+/**
+  * Componente Principal encargado de logueo y obtención de datos
+  */
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      serverData: {},
       filterString: ''
     }
   }
+  /**
+   * se carga el token para la navegación una vez autenticado.
+   * 
+   * TODO: validar problema cuando el token expira, es necesario redireccionar a login
+   */
   componentDidMount() {
     let parsed = queryString.parse(window.location.search);
     let accessToken = parsed.access_token;
@@ -75,9 +115,11 @@ class App extends Component {
       headers: { 'Authorization': 'Bearer ' + accessToken }
     }).then(response => response.json())
       .then(data => {
+        console.log(data)
         this.setState({
           user: {
-            name: data.display_name
+            name: data.display_name,
+            imageUrl: data.images[0].url
           }
         })
       })
@@ -95,10 +137,10 @@ class App extends Component {
           let trackDataPromise = responsePromise.then(reponse => reponse.json());
           return trackDataPromise;
         })
-        let allTracksDataPromises=Promise.all(trackDataPromises);
-        let playlistPromise= allTracksDataPromises.then(trackDatas=> {
-          trackDatas.forEach((trackData,i) => {
-            playlists[i].trackDatas=trackData.items.map(item => item.track)
+        let allTracksDataPromises = Promise.all(trackDataPromises);
+        let playlistPromise = allTracksDataPromises.then(trackDatas => {
+          trackDatas.forEach((trackData, i) => {
+            playlists[i].trackDatas = trackData.items.map(item => item.track)
           })
           return playlists;
         })
@@ -130,7 +172,7 @@ class App extends Component {
       <div className="App">
         {this.state.user ?
           <div>
-            <Title name={this.state.user.name} />
+            <Title user={this.state.user} />
             <Summary playlists={playlistToRender} />
             <TotalSongs playlists={playlistToRender} />
             <Filter onTextChange={text => this.setState({ filterString: text })} />
